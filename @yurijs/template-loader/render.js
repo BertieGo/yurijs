@@ -2,6 +2,7 @@
 const { print } = require('recast');
 const { builders: b } = require('ast-types');
 const styleToObject = require('style-to-object');
+const path = require('path');
 
 const runtimeModule = '@yurijs/runtime';
 exports.runtimeModule = runtimeModule;
@@ -13,7 +14,7 @@ function renderImports(map) {
     for (const [name, id] of Object.entries(names)) {
       alias.push(`${name} as _${id}, `);
     }
-    lines.push(`import { ${alias.join('')}} from ${JSON.stringify(ns)};\n`);
+    lines.push(`import { ${alias.join('')}} from ${JSON.stringify(ns === '@yurijs/runtime' ? path.resolve(__dirname, '../../@yurijs/runtime/src/index.tsx') : ns)};\n`);
   }
   return lines.join('');
 }

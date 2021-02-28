@@ -1,4 +1,5 @@
 import { makeObservable, observable } from 'mobx';
+import classNames = require('classnames');
 
 export default class HomeViewModel {
   constructor() {
@@ -7,4 +8,10 @@ export default class HomeViewModel {
 
   @observable
   counter = 0;
+
+  list = [1,2];
+
+  onPropagation() {
+    console.log(233)
+  }
 }

@@ -5,11 +5,28 @@ import {
   Children,
   useMemo,
   CSSProperties,
+  createElement
 } from 'react';
 import classnames from 'classnames';
 import * as React from 'react';
 import { observable } from 'mobx';
 import { ClassValue } from 'classnames/types';
+
+const genGuard = (condition: string) => `if(${condition})return null;`;
+
+const modifierCodeAst = {
+  stop: '$event.stopPropagation();',
+  prevent: '$event.preventDefault();',
+  self: genGuard(`$event.target !== $event.currentTarget`),
+};
+
+export const handleEventWithModifiers = <T extends keyof typeof modifierCodeAst>(modifier: T) => {
+    const ret = modifierCodeAst[modifier];
+    if (typeof ret === 'undefined') {
+      return false;
+    }
+    return ret;
+}
 
 /**
  * 文本中的 {{ }} 内嵌表达式
@@ -82,6 +99,7 @@ export const CondBinding = observer(
     children: React.ReactElement;
     cond: () => number | undefined;
   }) => {
+    debugger
     let index = cond();
     const childArr = Children.toArray(children);
     if (index == null) {
@@ -226,6 +244,7 @@ export function useViewModel<PropTypes>(
   const vm = useMemo(() => {
     return new ViewModel($props);
   }, [ViewModel, $props]);
+
   React.useLayoutEffect(() => {
     if (typeof vm.mounted === 'function') {
       vm.mounted();

@@ -1,0 +1,357 @@
+{
+  "kind": "element",
+  "tagName": "div",
+  "type": [
+    "@yurijs/html",
+    "Div"
+  ],
+  "props": {
+    "class": "root"
+  },
+  "handlers": {},
+  "model": null,
+  "bindings": null,
+  "cond": null,
+  "repeat": null,
+  "ref": null,
+  "children": [
+    {
+      "kind": "text",
+      "text": "Hello, @yurijs!"
+    },
+    {
+      "kind": "element",
+      "tagName": "div",
+      "type": [
+        "@yurijs/html",
+        "Div"
+      ],
+      "props": {},
+      "handlers": {},
+      "model": null,
+      "bindings": null,
+      "cond": null,
+      "repeat": null,
+      "ref": null,
+      "children": [
+        {
+          "kind": "element",
+          "tagName": "button",
+          "type": [
+            "@yurijs/html",
+            "Button"
+          ],
+          "props": {},
+          "handlers": {
+            "onClick": {
+              "callee": {
+                "name": "action",
+                "loc": null,
+                "type": "Identifier",
+                "comments": null,
+                "optional": false,
+                "typeAnnotation": null
+              },
+              "arguments": [
+                {
+                  "id": null,
+                  "params": [
+                    {
+                      "name": "$event",
+                      "loc": null,
+                      "type": "Identifier",
+                      "comments": null,
+                      "optional": false,
+                      "typeAnnotation": null
+                    }
+                  ],
+                  "body": {
+                    "body": [
+                      {
+                        "expression": {
+                          "type": "UpdateExpression",
+                          "start": 0,
+                          "end": 9,
+                          "loc": {
+                            "start": {
+                              "line": 1,
+                              "column": 0
+                            },
+                            "end": {
+                              "line": 1,
+                              "column": 9
+                            }
+                          },
+                          "operator": "++",
+                          "prefix": true,
+                          "argument": {
+                            "object": {
+                              "name": "$proxy",
+                              "loc": null,
+                              "type": "Identifier",
+                              "comments": null,
+                              "optional": false,
+                              "typeAnnotation": null
+                            },
+                            "property": {
+                              "type": "Identifier",
+                              "start": 2,
+                              "end": 9,
+                              "loc": {
+                                "start": {
+                                  "line": 1,
+                                  "column": 2
+                                },
+                                "end": {
+                                  "line": 1,
+                                  "column": 9
+                                },
+                                "identifierName": "counter"
+                              },
+                              "name": "counter",
+                              "optional": false,
+                              "typeAnnotation": null
+                            },
+                            "computed": false,
+                            "loc": null,
+                            "type": "MemberExpression",
+                            "comments": null,
+                            "optional": false
+                          },
+                          "comments": [],
+                          "errors": []
+                        },
+                        "loc": null,
+                        "type": "ExpressionStatement",
+                        "comments": null
+                      }
+                    ],
+                    "loc": null,
+                    "type": "BlockStatement",
+                    "comments": null,
+                    "directives": []
+                  },
+                  "generator": false,
+                  "expression": false,
+                  "loc": null,
+                  "type": "FunctionExpression",
+                  "comments": null,
+                  "async": false,
+                  "defaults": [],
+                  "rest": null,
+                  "returnType": null,
+                  "typeParameters": null,
+                  "predicate": null
+                }
+              ],
+              "loc": null,
+              "type": "CallExpression",
+              "comments": null,
+              "optional": false,
+              "typeArguments": null
+            }
+          },
+          "model": null,
+          "bindings": null,
+          "cond": null,
+          "repeat": null,
+          "ref": null,
+          "children": [
+            {
+              "kind": "text",
+              "text": "+"
+            }
+          ],
+          "variables": {
+            "$props": true,
+            "$vm": true,
+            "$proxy": true
+          }
+        },
+        {
+          "kind": "expression",
+          "ast": {
+            "object": {
+              "name": "$proxy",
+              "loc": null,
+              "type": "Identifier",
+              "comments": null,
+              "optional": false,
+              "typeAnnotation": null
+            },
+            "property": {
+              "type": "Identifier",
+              "start": 0,
+              "end": 7,
+              "loc": {
+                "start": {
+                  "line": 1,
+                  "column": 0
+                },
+                "end": {
+                  "line": 1,
+                  "column": 7
+                },
+                "identifierName": "counter"
+              },
+              "name": "counter",
+              "comments": [],
+              "errors": [],
+              "optional": false,
+              "typeAnnotation": null
+            },
+            "computed": false,
+            "loc": null,
+            "type": "MemberExpression",
+            "comments": null,
+            "optional": false
+          }
+        },
+        {
+          "kind": "element",
+          "tagName": "button",
+          "type": [
+            "@yurijs/html",
+            "Button"
+          ],
+          "props": {},
+          "handlers": {
+            "onClick": {
+              "callee": {
+                "name": "action",
+                "loc": null,
+                "type": "Identifier",
+                "comments": null,
+                "optional": false,
+                "typeAnnotation": null
+              },
+              "arguments": [
+                {
+                  "id": null,
+                  "params": [
+                    {
+                      "name": "$event",
+                      "loc": null,
+                      "type": "Identifier",
+                      "comments": null,
+                      "optional": false,
+                      "typeAnnotation": null
+                    }
+                  ],
+                  "body": {
+                    "body": [
+                      {
+                        "expression": {
+                          "type": "UpdateExpression",
+                          "start": 0,
+                          "end": 9,
+                          "loc": {
+                            "start": {
+                              "line": 1,
+                              "column": 0
+                            },
+                            "end": {
+                              "line": 1,
+                              "column": 9
+                            }
+                          },
+                          "operator": "--",
+                          "prefix": true,
+                          "argument": {
+                            "object": {
+                              "name": "$proxy",
+                              "loc": null,
+                              "type": "Identifier",
+                              "comments": null,
+                              "optional": false,
+                              "typeAnnotation": null
+                            },
+                            "property": {
+                              "type": "Identifier",
+                              "start": 2,
+                              "end": 9,
+                              "loc": {
+                                "start": {
+                                  "line": 1,
+                                  "column": 2
+                                },
+                                "end": {
+                                  "line": 1,
+                                  "column": 9
+                                },
+                                "identifierName": "counter"
+                              },
+                              "name": "counter",
+                              "optional": false,
+                              "typeAnnotation": null
+                            },
+                            "computed": false,
+                            "loc": null,
+                            "type": "MemberExpression",
+                            "comments": null,
+                            "optional": false
+                          },
+                          "comments": [],
+                          "errors": []
+                        },
+                        "loc": null,
+                        "type": "ExpressionStatement",
+                        "comments": null
+                      }
+                    ],
+                    "loc": null,
+                    "type": "BlockStatement",
+                    "comments": null,
+                    "directives": []
+                  },
+                  "generator": false,
+                  "expression": false,
+                  "loc": null,
+                  "type": "FunctionExpression",
+                  "comments": null,
+                  "async": false,
+                  "defaults": [],
+                  "rest": null,
+                  "returnType": null,
+                  "typeParameters": null,
+                  "predicate": null
+                }
+              ],
+              "loc": null,
+              "type": "CallExpression",
+              "comments": null,
+              "optional": false,
+              "typeArguments": null
+            }
+          },
+          "model": null,
+          "bindings": null,
+          "cond": null,
+          "repeat": null,
+          "ref": null,
+          "children": [
+            {
+              "kind": "text",
+              "text": "-"
+            }
+          ],
+          "variables": {
+            "$props": true,
+            "$vm": true,
+            "$proxy": true
+          }
+        }
+      ],
+      "variables": {
+        "$props": true,
+        "$vm": true,
+        "$proxy": true
+      }
+    }
+  ],
+  "variables": {
+    "$props": true,
+    "$vm": true,
+    "$proxy": true
+  }
+}

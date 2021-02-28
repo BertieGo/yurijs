@@ -1,4 +1,6 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const hmrTemplateLoader = require('../../@yurijs/hmr-template-loader/loader');
+const templateLoader = require('../../@yurijs/template-loader/loader')
 const path = require('path');
 
 module.exports = (_, argv) => {
@@ -38,10 +40,10 @@ module.exports = (_, argv) => {
           use: __DEV__
             ? [
                 {
-                  loader: '@yurijs/hmr-template-loader',
+                  loader: path.resolve(__dirname, '../../@yurijs/hmr-template-loader/loader'),
                 },
                 {
-                  loader: '@yurijs/template-loader',
+                  loader: path.resolve(__dirname, '../../@yurijs/template-loader/loader'),
                   options: {
                     defaultNS: '@yurijs/html',
                     styleExtension: '.less',

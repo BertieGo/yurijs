@@ -1,7 +1,7 @@
 <div class="root">
   Hello, @yurijs!
-  <div>
-    <button @click="++counter">+</button>
+  <div @click="onPropagation">
+    <button @click.stop="++counter">+</button>
     {{counter}}
     <button @click="--counter">-</button>
   </div>

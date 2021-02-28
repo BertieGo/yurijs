@@ -1,6 +1,7 @@
 const { getOptions } = require('loader-utils');
 const { parseHtml } = require('./parser');
 const { render, runtimeModule } = require('./render');
+const path = require('path');
 
 module.exports = function loader(source) {
   const options = getOptions(this);
@@ -15,12 +16,11 @@ module.exports = function loader(source) {
   });
   const [imports, jsx] = render(ast, options);
 
+  debugger
   const ret = `
 import React, { createElement, Fragment, useMemo } from 'react';
 import { action } from 'mobx';
-import { useProps, useProxy, useViewModel } from ${JSON.stringify(
-    runtimeModule
-  )};
+import { useProps, useProxy, useViewModel } from ${JSON.stringify(path.resolve(__dirname, '../../@yurijs/runtime/src/index.tsx'))};
 ${
   ast.viewModel ? `import ViewModel from ${JSON.stringify(ast.viewModel)};` : ''
 }

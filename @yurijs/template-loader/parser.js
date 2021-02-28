@@ -3,6 +3,8 @@ const htmlparser2 = require('htmlparser2');
 const babelParser = require('@babel/parser');
 const camelCase = require('camelcase');
 const { visit, namedTypes: n, builders: b } = require('ast-types');
+const path = require('path');
+const { handleEventWithModifiers } = require(path.resolve(__dirname, '../../@yurijs/runtime/dist/index.js'));
 
 const defaultTagRE = /\{\{((?:.|\r?\n)+?)\}\}/g;
 const identifierRE = /^[A-Za-z_]\w+$/;
@@ -11,6 +13,20 @@ const shortNS = {
   ':': 'v-bind',
   '@': 'v-on',
 };
+
+const modifierSymbol = '.';
+
+function modifierInjectHandler(blockStatement, modifiers) {
+  if (modifiers.length === 0) return;
+
+  for (let i = 0; i < modifiers.length; i++) {
+    const modifierCode = handleEventWithModifiers(modifiers[i]);
+    if (modifierCode === false) {
+      continue;
+    }
+    blockStatement.unshift(...babelParser.parse(handleEventWithModifiers(modifiers[i])).program.body);
+  }
+}
 
 function normalizeComponentName(name) {
   return name
@@ -44,9 +60,18 @@ function parseType(name, namespaces, alias) {
   return [ns, name.substr(id + 1)];
 }
 
+function parseModifiers(name) {
+  return name.indexOf(modifierSymbol) >= 0 ? name.split(modifierSymbol).slice(1) : [];
+}
+
 function parsePropName(name, namespaces) {
+  const split = name.split(modifierSymbol);
   if (shortNS[name[0]]) {
-    return [shortNS[name[0]], name.substr(1)];
+    return [
+      shortNS[name[0]],
+      split[0].substr(1),
+      parseModifiers(name)
+    ];
   }
   const id = name.indexOf(':');
   if (id === -1) {
@@ -57,36 +82,48 @@ function parsePropName(name, namespaces) {
   if (!ns) {
     throw new Error(`namespace \`${nspart}\` not found for: \`${name}\``);
   }
-  return [ns, name.substr(id + 1)];
+
+  return [ns, split[0].substr(id + 1), parseModifiers(name)];
 }
 
 function transformEventName(name) {
   return 'on' + name.substr(0, 1).toUpperCase() + name.substr(1);
 }
 
-function parseEventHandler(value, variables) {
+function parseEventHandler(value, modifiers, variables) {
   value = value.trim();
   if (identifierRE.test(value)) {
     // method name
+    const blockStatement = [
+
+      b.expressionStatement(
+        b.callExpression(
+          b.memberExpression(b.identifier('$proxy'), b.identifier(value)),
+          [b.identifier('arguments')]
+        )
+      ),
+    ]
+
+    modifierInjectHandler(blockStatement, modifiers);
     return b.functionExpression(
       null,
-      [],
-      b.blockStatement([
-        b.expressionStatement(
-          b.callExpression(
-            b.memberExpression(b.identifier('$proxy'), b.identifier(value)),
-            [b.identifier('arguments')]
-          )
-        ),
-      ])
+      [b.identifier('$event')],
+      b.blockStatement(blockStatement)
     );
+
   }
   const ast = parseExpression(value, variables);
+  const blockStatement = [
+    b.expressionStatement(ast)
+  ];
+
+  modifierInjectHandler(blockStatement, modifiers);
+
   return b.callExpression(b.identifier('action'), [
     b.functionExpression(
       null,
       [b.identifier('$event')],
-      b.blockStatement([b.expressionStatement(ast)])
+      b.blockStatement(blockStatement)
     ),
   ]);
 }
@@ -126,7 +163,7 @@ function parseAttribs(el, attribs, namespaces) {
   }
 
   for (const [key, value] of Object.entries(attribs)) {
-    const [ns, name] = parsePropName(key, namespaces);
+    const [ns, name, modifiers] = parsePropName(key, namespaces);
 
     switch (ns) {
       case '': {
@@ -159,10 +196,14 @@ function parseAttribs(el, attribs, namespaces) {
       }
       case 'v-on': {
         const propName = transformEventName(name);
-        el.handlers[camelCase(propName)] = parseEventHandler(value, {
-          ...el.variables,
-          $event: true,
-        });
+        el.handlers[camelCase(propName)] = parseEventHandler(
+          `${value}`,
+          modifiers,
+          {
+            ...el.variables,
+            $event: true,
+          },
+        );
         break;
       }
       default: {
