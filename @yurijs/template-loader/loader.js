@@ -14,13 +14,13 @@ module.exports = function loader(source) {
       options.styleExtension || '.css'
     ),
   });
+
   const [imports, jsx] = render(ast, options);
 
-  debugger
   const ret = `
 import React, { createElement, Fragment, useMemo } from 'react';
 import { action } from 'mobx';
-import { useProps, useProxy, useViewModel } from ${JSON.stringify(path.resolve(__dirname, '../../@yurijs/runtime/src/index.tsx'))};
+import { useProps, useProxy, useViewModel, handleWithModifiers } from ${JSON.stringify(path.resolve(__dirname, '../../@yurijs/runtime/src/index.tsx'))};
 ${
   ast.viewModel ? `import ViewModel from ${JSON.stringify(ast.viewModel)};` : ''
 }

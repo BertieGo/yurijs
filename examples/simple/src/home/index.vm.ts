@@ -14,4 +14,12 @@ export default class HomeViewModel {
   onPropagation() {
     console.log(233)
   }
+
+  onKeyupEnter(e: any) {
+   console.log(e)
+  }
+
+  onKeyupEsc() {
+    console.log('esc')
+  }
 }

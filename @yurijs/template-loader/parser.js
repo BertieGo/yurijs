@@ -3,8 +3,7 @@ const htmlparser2 = require('htmlparser2');
 const babelParser = require('@babel/parser');
 const camelCase = require('camelcase');
 const { visit, namedTypes: n, builders: b } = require('ast-types');
-const path = require('path');
-const { handleEventWithModifiers } = require(path.resolve(__dirname, '../../@yurijs/runtime/dist/index.js'));
+const eventNameMap = require('./event-name-map');
 
 const defaultTagRE = /\{\{((?:.|\r?\n)+?)\}\}/g;
 const identifierRE = /^[A-Za-z_]\w+$/;
@@ -13,20 +12,7 @@ const shortNS = {
   ':': 'v-bind',
   '@': 'v-on',
 };
-
 const modifierSymbol = '.';
-
-function modifierInjectHandler(blockStatement, modifiers) {
-  if (modifiers.length === 0) return;
-
-  for (let i = 0; i < modifiers.length; i++) {
-    const modifierCode = handleEventWithModifiers(modifiers[i]);
-    if (modifierCode === false) {
-      continue;
-    }
-    blockStatement.unshift(...babelParser.parse(handleEventWithModifiers(modifiers[i])).program.body);
-  }
-}
 
 function normalizeComponentName(name) {
   return name
@@ -35,7 +21,7 @@ function normalizeComponentName(name) {
       v
         .split('-')
         .map((v) => `${v[0].toUpperCase()}${v.substr(1)}`)
-        .join('')
+        .join(''),
     )
     .join('.');
 }
@@ -61,7 +47,10 @@ function parseType(name, namespaces, alias) {
 }
 
 function parseModifiers(name) {
-  return name.indexOf(modifierSymbol) >= 0 ? name.split(modifierSymbol).slice(1) : [];
+  const ret = {};
+  const modifiersArr = name.indexOf(modifierSymbol) >= 0 ? name.split(modifierSymbol).slice(1) : [];
+  modifiersArr.length > 0 && (modifiersArr.forEach(m => ret[m] = true));
+  return ret;
 }
 
 function parsePropName(name, namespaces) {
@@ -70,7 +59,7 @@ function parsePropName(name, namespaces) {
     return [
       shortNS[name[0]],
       split[0].substr(1),
-      parseModifiers(name)
+      parseModifiers(name),
     ];
   }
   const id = name.indexOf(':');
@@ -86,46 +75,29 @@ function parsePropName(name, namespaces) {
   return [ns, split[0].substr(id + 1), parseModifiers(name)];
 }
 
-function transformEventName(name) {
-  return 'on' + name.substr(0, 1).toUpperCase() + name.substr(1);
-}
-
-function parseEventHandler(value, modifiers, variables) {
+function parseEventHandler(value, variables) {
   value = value.trim();
   if (identifierRE.test(value)) {
     // method name
-    const blockStatement = [
-
-      b.expressionStatement(
-        b.callExpression(
-          b.memberExpression(b.identifier('$proxy'), b.identifier(value)),
-          [b.identifier('arguments')]
-        )
-      ),
-    ]
-
-    modifierInjectHandler(blockStatement, modifiers);
     return b.functionExpression(
       null,
-      [b.identifier('$event')],
-      b.blockStatement(blockStatement)
+      [],
+      b.blockStatement([
+        b.expressionStatement(
+          b.callExpression(
+            b.memberExpression(b.identifier('$proxy'), b.identifier(value)),
+            [b.spreadElement(b.identifier('arguments'))],
+          ),
+        ),
+      ]),
     );
-
   }
   const ast = parseExpression(value, variables);
-  const blockStatement = [
-    b.expressionStatement(ast)
-  ];
-
-  modifierInjectHandler(blockStatement, modifiers);
-
-  return b.callExpression(b.identifier('action'), [
-    b.functionExpression(
-      null,
-      [b.identifier('$event')],
-      b.blockStatement(blockStatement)
-    ),
-  ]);
+  return b.functionExpression(
+    null,
+    [b.identifier('$event')],
+    b.blockStatement([b.expressionStatement(ast)]),
+  );
 }
 
 function parseFor(value, variables) {
@@ -195,15 +167,18 @@ function parseAttribs(el, attribs, namespaces) {
         break;
       }
       case 'v-on': {
-        const propName = transformEventName(name);
-        el.handlers[camelCase(propName)] = parseEventHandler(
-          `${value}`,
+        const propName = eventNameMap[name];
+        el.handlers.push({
+          event: camelCase(propName),
+          handler: parseEventHandler(
+            `${value}`,
+            {
+              ...el.variables,
+              $event: true,
+            },
+          ),
           modifiers,
-          {
-            ...el.variables,
-            $event: true,
-          },
-        );
+        });
         break;
       }
       default: {
@@ -363,7 +338,7 @@ function parseHtml(text, options, paths) {
           tagName: name,
           type,
           props: {},
-          handlers: {},
+          handlers: [],
           model: null,
           bindings: null,
           cond: null,
@@ -393,10 +368,11 @@ function parseHtml(text, options, paths) {
       recognizeSelfClosing: true,
       lowerCaseTags: false,
       lowerCaseAttributeNames: false,
-    }
+    },
   );
   parser.write(text);
   parser.end();
   return root;
 }
+
 exports.parseHtml = parseHtml;

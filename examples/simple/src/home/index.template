@@ -1,8 +1,9 @@
 <div class="root">
   Hello, @yurijs!
-  <div @click="onPropagation">
-    <button @click.stop="++counter">+</button>
+  <div @click.self="onPropagation">
+    <button @click="++counter">+</button>
     {{counter}}
-    <button @click="--counter">-</button>
+    <button @click.right="--counter">-</button>
+    <input v-for="item in list" @keyup.enter="onKeyupEnter"></input>
   </div>
 </div>

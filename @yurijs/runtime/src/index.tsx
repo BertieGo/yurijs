@@ -1,32 +1,74 @@
 import { observer } from 'mobx-react-lite';
-import {
-  cloneElement,
-  ReactElement,
-  Children,
-  useMemo,
-  CSSProperties,
-  createElement
-} from 'react';
-import classnames from 'classnames';
 import * as React from 'react';
-import { observable } from 'mobx';
+import { Children, cloneElement, CSSProperties, ReactElement, SyntheticEvent, useMemo } from 'react';
+import classnames from 'classnames';
+import { action, observable } from 'mobx';
 import { ClassValue } from 'classnames/types';
 
-const genGuard = (condition: string) => `if(${condition})return null;`;
+type TEvent = SyntheticEvent & KeyboardEvent;
 
-const modifierCodeAst = {
-  stop: '$event.stopPropagation();',
-  prevent: '$event.preventDefault();',
-  self: genGuard(`$event.target !== $event.currentTarget`),
+type TEventProp = {
+  handler: (e: TEvent, ...args: any[]) => void,
+  modifiers: { [key: string]: boolean }
+}
+
+const keyCodes: { [key: string]: number | Array<number> } = {
+  esc: 27,
+  tab: 9,
+  enter: 13,
+  space: 32,
+  up: 38,
+  left: 37,
+  right: 39,
+  down: 40,
+  'delete': [8, 46],
 };
 
-export const handleEventWithModifiers = <T extends keyof typeof modifierCodeAst>(modifier: T) => {
-    const ret = modifierCodeAst[modifier];
-    if (typeof ret === 'undefined') {
-      return false;
-    }
-    return ret;
-}
+const isMatchedKey = <T extends keyof typeof keyCodes>(code: number, key: T) => {
+  if (Array.isArray(keyCodes[key])) {
+    const codes = keyCodes[key] as number[];
+    return codes.some((c: number) => c === code);
+  }
+  return code === keyCodes[key];
+};
+
+export const handleWithModifiers = function(props: TEventProp[]) {
+  return action(function($event: TEvent) {
+    props.forEach(function(prop: TEventProp) {
+      // 没有 modifiers，正常执行
+      if (Object.keys(prop.modifiers).length === 0) {
+        prop.handler($event);
+        return;
+      }
+
+      for (const key in prop.modifiers) {
+        if (key === 'stop') {
+          $event.stopPropagation();
+        }
+
+        if (key === 'prevent') {
+          $event.preventDefault();
+        }
+
+        if (key === 'self' && $event.target !== $event.currentTarget) {
+          return;
+        }
+
+        // 假如是点击事件
+        if ('button' in $event) {
+          prop.handler($event);
+          return;
+        }
+
+        // 假如是键盘事件且匹配到目标 key
+        if (isMatchedKey($event.keyCode, key)) {
+          prop.handler($event);
+        }
+      }
+    });
+  });
+};
+
 
 /**
  * 文本中的 {{ }} 内嵌表达式
@@ -99,7 +141,6 @@ export const CondBinding = observer(
     children: React.ReactElement;
     cond: () => number | undefined;
   }) => {
-    debugger
     let index = cond();
     const childArr = Children.toArray(children);
     if (index == null) {

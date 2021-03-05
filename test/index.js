@@ -23,7 +23,12 @@ const { print, parse } = require('recast');
 
 // const code = 'action((function() { const _event = false; return function() { count++ })())'
 
-const a = b.callExpression(b.identifier('action'), [
+
+// const a = b.arrayExpression([
+//   b.objectExpression([b.objectProperty(b.literal('test'), b.stringLiteral('233'))])
+// ])
+//
+// console.log(print(a))
 
   b.callExpression(
     b.identifier(''),
@@ -45,39 +50,13 @@ const a = b.callExpression(b.identifier('action'), [
 ]);
 
 
-const c = b.expressionStatement(
-  b.callExpression(
-    b.identifier(''),
-    []
-  ),
-  b.callExpression(
-    b.identifier(''),
-    []
-  )
-)
+const complier = (string) => {
+    const names = string.replace('\n', '').split(/\s+/);
+    const ret = {};
+  names.forEach((n) => {
+        ret[n.substr(2).toLowerCase()] = n;
+    })
+return ret;
+}
 
 
-const d = b.callStatement (
-  b.expressionStatement(
-    b.callExpression(
-      b.identifier(''),
-      []
-    ),
-  ),
-)
-
-console.log(print(d))
-
-// b.memberExpression(
-//   b.callExpression(
-//
-//   ), b.identifier('count')),
-//   b.identifier(''),
-//   [
-//     b.functionExpression(
-//       null,
-//       [],
-//       b.blockStatement([])
-//     )
-//   ],
-//   [],
